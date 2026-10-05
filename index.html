@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIHUB Product Catalog</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f8;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --accent-blue: #1d4ed8;
+      --badge-bg: rgba(0, 0, 0, 0.75);
+      --border-radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px;
+    }
+
+    /* Header & Navigation Bar */
+    header {
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 240px;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+    }
+
+    .file-loader {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background-color: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #1e40af;
+    }
+
+    .btn-secondary {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background-color: #d1d5db;
+    }
+
+    /* Staggered Masonry Layout */
+    .masonry-grid {
+      column-count: 3;
+      column-gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+      .masonry-grid { column-count: 2; }
+    }
+
+    @media (max-width: 600px) {
+      .masonry-grid { column-count: 1; }
+    }
+
+    /* Card Item */
+    .card {
+      break-inside: avoid;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .image-wrapper {
+      width: 100%;
+      position: relative;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .image-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+
+    .badge-qty {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--badge-bg);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .card-details {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .card-total {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent-blue);
+    }
+
+    /* Pagination Footer */
+    .pagination {
+      max-width: 1200px;
+      margin: 30px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pagination span {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1 id="project-title">CIHUB Catalog</h1>
+      <div class="file-loader">
+        <input type="file" id="file-input" accept=".json,.cihub" style="display: none;">
+        <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">Load Local File</button>
+      </div>
+    </div>
+    <div class="controls">
+      <input type="text" id="search-bar" class="search-input" placeholder="Search products by title or details...">
+    </div>
+  </header>
+
+  <main>
+    <div id="catalog-grid" class="masonry-grid"></div>
+    <div id="no-results" class="no-results" style="display: none;">No items found matching your search.</div>
+  </main>
+
+  <footer class="pagination" id="pagination-controls">
+    <button class="btn btn-secondary" id="btn-prev" onclick="changePage(-1)">Previous</button>
+    <span id="page-info">Page 1 of 1</span>
+    <button class="btn btn-secondary" id="btn-next" onclick="changePage(1)">Next</button>
+  </footer>
+
+  <script>
+    let catalogItems = [];
+    let filteredItems = [];
+    let currentPage = 1;
+    const itemsPerPage = 20;
+
+    // Default fallback sample item
+    const sampleData = {
+      projectName: "CIHUB IMPORTS",
+      items: [
+        {
+          id: 1,
+          name: "12pcs Edenberg Stainless",
+          qty: 1,
+          size: "Capacity 2.1ltr(16cm) sauce pan...",
+          unitPrice: 12500,
+          price: 12500,
+          image: ""
+        }
+      ]
+    };
+
+    // Load file locally
+    document.getElementById('file-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = JSON.parse(evt.target.result);
+          processCatalogData(data);
+        } catch (err) {
+          alert("Error parsing file. Please ensure it is a valid JSON/.cihub file.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Search bar functionality
+    document.getElementById('search-bar').addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase().trim();
+      filteredItems = catalogItems.filter(item => {
+        const nameMatch = (item.name || '').toLowerCase().includes(query);
+        const detailsMatch = (item.size || item.description || '').toLowerCase().includes(query);
+        return nameMatch || detailsMatch;
+      });
+      currentPage = 1;
+      renderGrid();
+    });
+
+    function processCatalogData(data) {
+      if (data.projectName) {
+        document.getElementById('project-title').textContent = data.projectName;
+      }
+      catalogItems = data.items || [];
+      filteredItems = [...catalogItems];
+      currentPage = 1;
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('catalog-grid');
+      const noResults = document.getElementById('no-results');
+      grid.innerHTML = '';
+
+      if (filteredItems.length === 0) {
+        noResults.style.display = 'block';
+        document.getElementById('pagination-controls').style.display = 'none';
+        return;
+      } else {
+        noResults.style.display = 'none';
+        document.getElementById('pagination-controls').style.display = 'flex';
+      }
+
+      // Calculate pagination bounds
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+      const startIdx = (currentPage - 1) * itemsPerPage;
+      const endIdx = startIdx + itemsPerPage;
+      const pageItems = filteredItems.slice(startIdx, endIdx);
+
+      // Render cards
+      pageItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const qty = item.qty || 1;
+        const totalFormatted = (item.price || 0).toLocaleString();
+        const unitPriceFormatted = (item.unitPrice || item.price || 0).toLocaleString();
+        const imageSrc = item.image || 'https://via.placeholder.com/300x300?text=No+Image';
+
+        card.innerHTML = `
+          <div class="image-wrapper">
+            <span class="badge-qty">Qty: ${qty}</span>
+            <img src="${imageSrc}" alt="${item.name || 'Product'}">
+          </div>
+          <div class="card-title">${item.name || 'Untitled Product'}</div>
+          <div class="card-details">
+            ${item.size ? item.size : 'No size'} | Unit: Ksh ${unitPriceFormatted}
+          </div>
+          <div class="card-total">Total: Ksh ${totalFormatted}</div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      // Update Pagination UI
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+      document.getElementById('btn-prev').disabled = currentPage === 1;
+      document.getElementById('btn-next').disabled = currentPage === totalPages || totalPages === 0;
+    }
+
+    function changePage(delta) {
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+      const newPage = currentPage + delta;
+      if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        renderGrid();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Initialize with sample data
+    processCatalogData(sampleData);
+  </script>
+</body>
+</html>
